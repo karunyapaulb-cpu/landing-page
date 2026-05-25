@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Six-Week Career Sprint</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: #0d1b2e;
+      min-height: 100vh;
+      padding: 52px 36px 72px;
+    }
+
+    .cr-inner { max-width: 1080px; margin: 0 auto; }
+
+    .cr-head {
+      margin-bottom: 52px;
+      display: flex; align-items: flex-end;
+      justify-content: space-between; flex-wrap: wrap; gap: 20px;
+    }
+
+    .cr-overline {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.22em;
+      text-transform: uppercase; color: #3d5a7a; margin-bottom: 14px;
+    }
+
+    .cr-title {
+      font-family: 'Libre Baskerville', serif;
+      font-size: clamp(32px, 4.5vw, 52px);
+      font-weight: 700; line-height: 1.1; color: #e8e0d4;
+    }
+    .cr-title em { font-style: italic; color: #c9a96e; }
+
+    .cr-pills { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
+    .cr-pill {
+      font-size: 11px; font-weight: 500; color: #4a7599;
+      border: 1px solid #1a3050; border-radius: 20px;
+      padding: 5px 14px; letter-spacing: 0.04em; background: #0f2338;
+    }
+
+    .cr-rule {
+      height: 1px;
+      background: linear-gradient(90deg, #1e3a55 0%, #1a3050 60%, transparent 100%);
+      margin-bottom: 36px;
+    }
+
+    .cr-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 640px) { .cr-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 400px) { .cr-grid { grid-template-columns: 1fr; } }
+
+    .wk {
+      border-radius: 10px;
+      background: #f5eedc;
+      border: 1px solid #d4c4a8;
+      padding: 18px 16px 14px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.18s, background 0.18s, transform 0.14s;
+      text-align: left; width: 100%; display: block;
+    }
+    .wk:hover { transform: translateY(-2px); border-color: #c0a87a; }
+
+    .wk.open {
+      border-color: var(--acc);
+      background: #ede5cc;
+      box-shadow: 0 0 0 1px var(--acc), 0 8px 24px rgba(0,0,0,0.3);
+    }
+
+    .wk-top-bar {
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      border-radius: 10px 10px 0 0;
+      background: var(--acc); opacity: 0;
+      transition: opacity 0.18s;
+    }
+    .wk.open .wk-top-bar, .wk:hover .wk-top-bar { opacity: 1; }
+
+    .wk-ghost {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 60px; font-weight: 700;
+      position: absolute; bottom: -10px; right: -2px;
+      line-height: 1; color: var(--acc);
+      opacity: 0.06; transition: opacity 0.18s;
+      pointer-events: none; user-select: none;
+    }
+    .wk:hover .wk-ghost, .wk.open .wk-ghost { opacity: 0.13; }
+
+    .wk-badge {
+      display: inline-block;
+      font-size: 9px; font-weight: 600; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--acc);
+      border: 1px solid var(--acc); border-radius: 3px;
+      padding: 2px 6px; margin-bottom: 12px; opacity: 0.85;
+      background: rgba(var(--acc-rgb), 0.12);
+    }
+
+    .wk-title {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 13px; font-weight: 700; line-height: 1.35;
+      color: #2a1f0e; margin-bottom: 7px;
+    }
+    .wk.open .wk-title { color: #1a1208; }
+
+    .wk-sub {
+      font-size: 10px; font-weight: 300; color: #7a6a52;
+      line-height: 1.45; margin-bottom: 14px;
+    }
+
+    .wk-foot {
+      display: flex; align-items: center; justify-content: space-between;
+      border-top: 1px solid #ddd0b8; padding-top: 10px;
+    }
+    .wk-count { font-size: 9.5px; font-weight: 500; color: #9a8a72; letter-spacing: 0.06em; }
+    .wk-chev {
+      width: 13px; height: 13px; color: #b0a080;
+      transition: transform 0.22s ease, color 0.18s; flex-shrink: 0;
+    }
+    .wk.open .wk-chev { transform: rotate(180deg); color: var(--acc); }
+
+    .cr-panel {
+      margin-top: 16px;
+      border-radius: 12px;
+      background: #091726;
+      border: 1px solid #d4c4a8;
+      padding: 24px 28px;
+      animation: panelIn 0.22s cubic-bezier(.22,.68,0,1.1) both;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @keyframes panelIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .cr-panel-bar {
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      border-radius: 12px 12px 0 0;
+      background: var(--acc);
+    }
+
+    .cr-panel-head {
+      display: flex; align-items: baseline; gap: 12px;
+      margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .cr-panel-week {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--acc); opacity: 0.9;
+    }
+    .cr-panel-title {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 17px; font-weight: 700; color: #e0eaf4;
+    }
+
+    .cr-panel-sessions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 500px) { .cr-panel-sessions { grid-template-columns: 1fr; } }
+
+    .sess {
+      border-radius: 8px;
+      background: #0d1f30;
+      border: 1px solid #d4c4a8;
+      border-left: 3px solid var(--acc);
+      padding: 14px 14px 12px 16px;
+    }
+
+    .sess-code {
+      font-size: 9px; font-weight: 600; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--acc); opacity: 0.8;
+      margin-bottom: 7px;
+    }
+
+    .sess-title {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 12px; font-weight: 400; color: #90adc4;
+      line-height: 1.45; margin-bottom: 10px; font-style: italic;
+    }
+
+    .sess-out {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 9px; font-weight: 500; letter-spacing: 0.05em;
+      color: var(--acc);
+      background: rgba(var(--acc-rgb), 0.1);
+      border-radius: 4px; padding: 3px 8px;
+    }
+    .sess-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--acc); flex-shrink: 0; }
+
+    .cr-legend {
+      margin-top: 44px;
+      display: flex; flex-wrap: wrap;
+      border: 1px solid #152d45; border-radius: 10px; overflow: hidden;
+    }
+    .cr-leg-item {
+      flex: 1; min-width: 140px; padding: 14px 16px;
+      border-right: 1px solid #152d45;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .cr-leg-item:last-child { border-right: none; }
+    .cr-leg-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .cr-leg-text { font-size: 10px; font-weight: 500; color: #2d4d6a; line-height: 1.3; }
+    .cr-leg-code { font-size: 9px; color: #1e3a55; display: block; margin-top: 1px; letter-spacing: 0.06em; }
+  </style>
+</head>
+<body>
+  <div class="cr-inner">
+
+    <div class="cr-head">
+      <div>
+        <p class="cr-overline">Professional Development Program · 2025</p>
+        <h1 class="cr-title">Six-Week<br /><em>Career Sprint</em></h1>
+      </div>
+      <div class="cr-pills">
+        <span class="cr-pill">6 Weeks</span>
+        <span class="cr-pill">12 Sessions</span>
+        <span class="cr-pill">AI-Powered</span>
+      </div>
+    </div>
+
+    <div class="cr-rule"></div>
+
+    <div class="cr-grid" id="weekGrid"></div>
+
+    <div id="panelContainer"></div>
+
+    <div class="cr-legend" id="legend"></div>
+
+  </div>
+
+  <script>
+    const weeks = [
+      {
+        code: "W1", num: "01", title: "Context, Urgency & Foundations",
+        sub: "Shift from student to professional mindset",
+        accent: "#E8C547", accentRgb: "232,197,71",
+        sessions: [
+          { code: "S1", full: "Careers in the AI Era: Threat, Opportunity & Survival Toolkit", output: "AI Tools & Work Map" },
+          { code: "S2", full: "Structured Thinking → Prompting Mastery", output: "Personal Prompt Library" },
+        ],
+      },
+      {
+        code: "W2", num: "02", title: "Research & Analytical Thinking Lab",
+        sub: "Think like professionals, not students",
+        accent: "#F4845F", accentRgb: "244,132,95",
+        sessions: [
+          { code: "S3", full: "Research Thinking with AI Tools", output: "Industry Research Brief" },
+          { code: "S4", full: "Business Analysis & Case Thinking with AI", output: "Mini Business Case" },
+        ],
+      },
+      {
+        code: "W3", num: "03", title: "Professional Communication & Work Execution",
+        sub: "Effective communicators and reliable executors",
+        accent: "#7EC8A4", accentRgb: "126,200,164",
+        sessions: [
+          { code: "S5", full: "Professional Writing Lab with AI", output: "Professional Writing Pack" },
+          { code: "S6", full: "Meetings, Documentation & Project Tracking", output: "Meeting-to-Action Pack" },
+        ],
+      },
+      {
+        code: "W4", num: "04", title: "Presentations & Business Storytelling",
+        sub: "Think before you open PowerPoint",
+        accent: "#C9A0DC", accentRgb: "201,160,220",
+        sessions: [
+          { code: "S7", full: "Slide Thinking & Storyboarding Lab", output: "Presentation Storyboard" },
+          { code: "S8", full: "Building Business-Ready Presentations with AI", output: "Presentation Deck" },
+        ],
+      },
+      {
+        code: "W5", num: "05", title: "Excel, Data & Productivity Systems",
+        sub: "Decision-oriented data thinking",
+        accent: "#F4A261", accentRgb: "244,162,97",
+        sessions: [
+          { code: "S9", full: "Excel & Data Reasoning Lab with AI", output: "Data Insight Report" },
+          { code: "S10", full: "Building a Personal AI Productivity System", output: "AI Workflow SOP" },
+        ],
+      },
+      {
+        code: "W6", num: "06", title: "Career Application & Placement Readiness",
+        sub: "Convert learning into placement outcomes",
+        accent: "#5BC4D1", accentRgb: "91,196,209",
+        sessions: [
+          { code: "S11", full: "Career Mapping & Career Intelligence Lab", output: "Career Intelligence Report" },
+          { code: "S12", full: "Resume, LinkedIn & Interview Readiness Lab", output: "Career Readiness Kit" },
+        ],
+      },
+    ];
+
+    let openIndex = null;
+
+    function renderGrid() {
+      const grid = document.getElementById('weekGrid');
+      grid.innerHTML = '';
+      weeks.forEach((w, i) => {
+        const isOpen = openIndex === i;
+        const btn = document.createElement('button');
+        btn.className = 'wk' + (isOpen ? ' open' : '');
+        btn.style.setProperty('--acc', w.accent);
+        btn.style.setProperty('--acc-rgb', w.accentRgb);
+        btn.setAttribute('aria-expanded', isOpen);
+        btn.innerHTML = `
+          <div class="wk-top-bar"></div>
+          <div class="wk-ghost">${w.num}</div>
+          <div class="wk-badge">${w.code}</div>
+          <h2 class="wk-title">${w.title}</h2>
+          <p class="wk-sub">${w.sub}</p>
+          <div class="wk-foot">
+            <span class="wk-count">${w.sessions.length} sessions</span>
+            <svg class="wk-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </div>
+        `;
+        btn.addEventListener('click', () => {
+          openIndex = openIndex === i ? null : i;
+          renderGrid();
+          renderPanel();
+        });
+        grid.appendChild(btn);
+      });
+    }
+
+    function renderPanel() {
+      const container = document.getElementById('panelContainer');
+      if (openIndex === null) {
+        container.innerHTML = '';
+        return;
+      }
+      const w = weeks[openIndex];
+      const sessionsHTML = w.sessions.map((s, si) => `
+        <div class="sess">
+          <div class="sess-code">${s.code} · ${String(openIndex * 2 + si + 1).padStart(2, '0')}</div>
+          <p class="sess-title">${s.full}</p>
+          <div class="sess-out">
+            <div class="sess-dot"></div>
+            ${s.output}
+          </div>
+        </div>
+      `).join('');
+
+      container.innerHTML = `
+        <div class="cr-panel" style="--acc: ${w.accent}; --acc-rgb: ${w.accentRgb};">
+          <div class="cr-panel-bar"></div>
+          <div class="cr-panel-head">
+            <span class="cr-panel-week">${w.code}</span>
+            <span class="cr-panel-title">${w.title}</span>
+          </div>
+          <div class="cr-panel-sessions">
+            ${sessionsHTML}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderLegend() {
+      const legend = document.getElementById('legend');
+      legend.innerHTML = weeks.map(w => `
+        <div class="cr-leg-item">
+          <div class="cr-leg-dot" style="background: ${w.accent};"></div>
+          <div class="cr-leg-text">
+            ${w.title.split(' ').slice(0, 2).join(' ')}
+            <span class="cr-leg-code">${w.code} · ${w.sessions.length} sessions</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    renderGrid();
+    renderPanel();
+    renderLegend();
+  </script>
+</body>
+</html>
